@@ -5,10 +5,8 @@ defmodule Slax.Chat.Room do
   schema "rooms" do
     field :name, :string
     field :topic, :string
-    field :inserted_at, :utc_datetime
-    field :updated_at, :utc_datetime
 
-    # timestamps(type: :utc_datetime)
+    timestamps(type: :utc_datetime)
   end
 
   @doc false
