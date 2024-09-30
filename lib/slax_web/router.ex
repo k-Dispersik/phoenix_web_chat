@@ -20,6 +20,7 @@ defmodule SlaxWeb.Router do
     # get "/", PageController, :home
     get "/home", PageContoller, :home
     live "/", ChatRoomLive
+    live "rooms/:id", ChatRoomLive
   end
 
   # Other scopes may use custom stacks.
