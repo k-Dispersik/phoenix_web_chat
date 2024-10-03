@@ -402,7 +402,7 @@ defmodule SlaxWeb.ChatRoomLive do
     {:noreply, assign(socket, online_users: online_users)}
   end
 
-  def handle_event("join-room", _v, socket) do
+  def handle_event("join-room", _, socket) do
     current_user = socket.assigns.current_user
     Chat.join_room!(socket.assigns.room, current_user)
     Chat.subscribe_to_room(socket.assigns.room)
