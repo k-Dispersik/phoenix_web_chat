@@ -1,6 +1,6 @@
 defmodule Slax.Chat do
   alias Slax.Chat.Room
-  alias Slax.Chat.{Message, Room}
+  alias Slax.Chat.{Message, Room, RoomMembership}
   alias Slax.Repo
   alias Slax.Accounts.User
 
@@ -81,4 +81,7 @@ defmodule Slax.Chat do
     Phoenix.PubSub.broadcast!(@pubsub, topic(room.id), {:user_typing, user})
   end
 
+  def join_room!(room, user) do
+    Repo.insert!(%RoomMembership{room: room, user: user})
+  end
 end
