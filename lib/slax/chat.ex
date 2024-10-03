@@ -77,4 +77,8 @@ defmodule Slax.Chat do
     Phoenix.PubSub.broadcast!(@pubsub, topic(message.room_id), {:message_deleted, message})
   end
 
+  def broadcast_typing(room, user) do
+    Phoenix.PubSub.broadcast!(@pubsub, topic(room.id), {:user_typing, user})
+  end
+
 end

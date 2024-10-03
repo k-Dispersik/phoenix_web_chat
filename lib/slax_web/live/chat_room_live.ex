@@ -13,7 +13,7 @@ defmodule SlaxWeb.ChatRoomLive do
      <div class="flex justify-between items-center flex-shrink-0 h-16 border-b border-slate-300 px-4">
        <div class="flex flex-col gap-1.5">
          <h1 class="text-lg font-bold text-gray-800">
-           Slax
+           <a href="/rooms">Slax</a>
          </h1>
        </div>
      </div>
@@ -23,7 +23,23 @@ defmodule SlaxWeb.ChatRoomLive do
        </div>
        <div id="rooms-list">
          <.room_link :for={room <- @rooms} room={room} active={room.id == @room.id} />
-       </div>
+         <button class="group relative flex items-center h-8 text-sm pl-8 pr-3 hover:bg-slate-300 cursor-pointer w-full">
+            <.icon name="hero-plus" class="h-4 w-4 relative top-px" />
+            <span class="ml-2 leading-none">Add rooms</span>
+            <div class="hidden group-focus:block cursor-default absolute top-8 right-2 bg-white border-slate-200 border py-3 rounded-lg">
+              <div class="w-full text-left">
+                <div class="hover:bg-sky-600">
+                  <div
+                    phx-click={JS.navigate(~p"/rooms")}
+                    class="cursor-pointer whitespace-nowrap text-gray-800 hover:text-white px-6 py-1"
+                  >
+                    Browse rooms
+                  </div>
+                </div>
+              </div>
+            </div>
+          </button>
+         </div>
        <div class="mt-4">
           <div class="flex items-center h-8 px-3 group">
             <div class="flex items-center flex-grow focus:outline-none">
@@ -58,6 +74,8 @@ defmodule SlaxWeb.ChatRoomLive do
            <% else %>
              <%= @room.topic %>
            <% end %>
+            <br>
+            <%= users_typing(assigns) %>
          </div>
        </div>
        <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
@@ -166,6 +184,7 @@ defmodule SlaxWeb.ChatRoomLive do
   attr :dom_id, :string, required: true
   attr :message, Message, required: true
   attr :timezone, :string, required: true
+  attr :users_typing, :map, default: Map.new()
 
   defp message(assigns) do
    ~H"""
@@ -203,6 +222,20 @@ defmodule SlaxWeb.ChatRoomLive do
     message.inserted_at
     |> Timex.Timezone.convert(timezone)
     |> Timex.format!("%-l:%M %p", :strftime)
+  end
+
+  defp users_typing(assigns) do
+    ~H"""
+    <%= if map_size(@users_typing) > 0 do %>
+      <span class="text-green-600"> Users typing:
+        <%= for {_pid, user} <- @users_typing do %>
+          <%= user.email %>,
+        <% end %>
+      </span>
+    <% else %>
+      <p>No one is typing</p>
+    <% end %>
+    """
   end
 
   defp room_link(assigns) do
@@ -259,7 +292,8 @@ defmodule SlaxWeb.ChatRoomLive do
       |> assign(
        hide_topic?: false,
        page_title: "#" <> room.name,
-       room: room
+       room: room,
+       users_typing: Map.new()
       )
       |> stream(:messages, messages, reset: true)
       |> assign_message_form(Chat.change_message(%Message{}))
@@ -271,13 +305,15 @@ defmodule SlaxWeb.ChatRoomLive do
   end
 
   def handle_event("toggle-topic", _params, socket) do
-    # {:noreply, assign(socket, hide_topic?: !socket.assigns.hide_topic?)}
+    {:noreply, assign(socket, hide_topic?: !socket.assigns.hide_topic?)}
     {:noreply, update(socket, :hide_topic?, &(!&1))}
   end
 
 
   def handle_event("validate-message", %{"message" => message_params}, socket) do
     changeset = Chat.change_message(%Message{}, message_params)
+    Chat.broadcast_typing(socket.assigns.room, socket.assigns.current_user)
+
     {:noreply, assign_message_form(socket, changeset)}
   end
 
@@ -319,6 +355,17 @@ defmodule SlaxWeb.ChatRoomLive do
 
   def handle_info({:message_deleted, message}, socket) do
     {:noreply, stream_delete(socket, :messages, message)}
+  end
+
+  def handle_info({:user_typing, user}, socket) do
+    Process.send_after(self(), :clear_writing, 3000)
+    users_typing = Map.put(socket.assigns.users_typing, self(), user)
+    {:noreply, assign(socket, :users_typing, users_typing)}
+  end
+
+  def handle_info(:clear_writing, socket) do
+    users_typing = Map.delete(socket.assigns.users_typing, self())
+    {:noreply, assign(socket, :users_typing, users_typing)}
   end
 
   def handle_info(%{event: "presence_diff", payload: diff}, socket) do
