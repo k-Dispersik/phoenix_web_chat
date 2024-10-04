@@ -225,12 +225,13 @@ defmodule SlaxWeb.ChatRoomLive do
   end
 
   attr :dom_id, :string, required: true
+  attr :on_click, JS, required: true
   attr :text, :string, required: true
 
 
   defp toggler(assigns) do
     ~H"""
-    <button id={@dom_id} class="flex items-center flex-grow focus:outline-none">
+    <button id={@dom_id} phx-click={@on_click} class="flex items-center flex-grow focus:outline-none">
       <.icon id={@dom_id <> "-chevron-down"} name="hero-chevron-down" class="h-4 w-4" />
       <.icon
         id={@dom_id <> "-chevron-right"}
