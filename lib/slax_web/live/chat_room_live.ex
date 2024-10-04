@@ -10,9 +10,9 @@ defmodule SlaxWeb.ChatRoomLive do
   def render(assigns) do
     ~H"""
    <div class="flex flex-col flex-shrink-0 w-64 bg-slate-100">
-     <div class="flex justify-between items-center flex-shrink-0 h-16 border-b border-slate-300 px-4">
+     <div class="flex justify-between items-center flex-shrink-0 h-20 border-b border-slate-300 px-4">
        <div class="flex flex-col gap-1.5">
-         <h1 class="text-lg font-bold text-gray-800">
+         <h1 class="text-lg font-bold text-red-800">
            <a href="/rooms">Slax</a>
          </h1>
        </div>
@@ -134,12 +134,21 @@ defmodule SlaxWeb.ChatRoomLive do
               <div class="text-sm">New</div>
             </div>
           <% else %>
-            <.message
-              current_user={@current_user}
-              dom_id={dom_id}
-              message={message}
-              timezone={@timezone}
-            />
+                <%= if message.id == @editing_message_id do %>
+                  <.edit_message
+                    current_user={@current_user}
+                    dom_id={dom_id}
+                    message={message}
+                    timezone={@timezone}
+                  />
+                <% else %>
+                  <.message
+                    current_user={@current_user}
+                    dom_id={dom_id}
+                    message={message}
+                    timezone={@timezone}
+                  />
+                <% end %>
           <% end %>
         <% end %>
       </div>
@@ -223,10 +232,20 @@ defmodule SlaxWeb.ChatRoomLive do
   attr :timezone, :string, required: true
   attr :users_typing, :map, default: Map.new()
   attr :joined?, :boolean, default: false
+  attr :editing_message, :boolean, default: false
+  attr :editing_message_id, :integer, default: -1
 
   defp message(assigns) do
    ~H"""
    <div id={@dom_id} class="group relative flex px-4 py-3">
+    <button
+        :if={@current_user.id == @message.user_id}
+        class="absolute top-4 right-12 text-blue-500 hover:text-violet-800 cursor-pointer hidden group-hover:block"
+        phx-click="edit-message"
+        phx-value-id={@message.id}
+        >
+        <.icon name="hero-pencil-square" class="h-4 w-4" />
+      </button>
     <button
         :if={@current_user.id == @message.user_id}
         class="absolute top-4 right-4 text-red-500 hover:text-red-800 cursor-pointer hidden group-hover:block"
@@ -236,7 +255,7 @@ defmodule SlaxWeb.ChatRoomLive do
         >
         <.icon name="hero-trash" class="h-4 w-4" />
       </button>
-     <div class="h-10 w-10 rounded flex-shrink-0 bg-slate-300"></div>
+     <img class="h-10 w-10 rounded flex-shrink-0" src={~p"/images/one_ring.jpg"} />
      <div class="ml-2">
        <div class="-mt-1">
          <.link class="text-sm font-semibold hover:underline">
@@ -248,6 +267,42 @@ defmodule SlaxWeb.ChatRoomLive do
          <p class="text-sm"><%= @message.body %></p>
        </div>
      </div>
+   </div>
+   """
+  end
+
+  defp edit_message(assigns) do
+    ~H"""
+    <p>1</p>
+   <div id={@dom_id} class="group relative flex px-4 py-3">
+     <div class="h-10 w-10 rounded flex-shrink-0 bg-slate-300"></div>
+     <div class="ml-2">
+       <div class="-mt-1">
+         <.link class="text-sm font-semibold hover:underline">
+           <span><%= username(@message.user) %></span>
+         </.link>
+         <span :if={@timezone} class="ml-1 text-xs text-gray-500">
+            <%= message_timestamp(@message, @timezone) %>
+          </span>
+          <texterea class="text-sm"><%= @message.body %></texterea>
+      <button
+        :if={@current_user.id == @message.user_id}
+        class="absolute top-4 right-12 text-blue-500 hover:text-violet-800 cursor-pointer hidden group-hover:block"
+        phx-click="edit-message-confirm"
+        phx-value-id={@message.id}
+        >
+        <.icon name="hero-check" class="h-8 w-8" />
+      </button>
+      <button
+        :if={@current_user.id == @message.user_id}
+        class="absolute top-4 right-12 text-blue-500 hover:text-violet-800 cursor-pointer hidden group-hover:block"
+        phx-click="edit-message-cancel"
+        phx-value-id={@message.id}
+        >
+        <.icon name="hero-x-mark" class="h-8 w-8" />
+      </button>
+     </div>
+   </div>
    </div>
    """
   end
@@ -345,7 +400,8 @@ defmodule SlaxWeb.ChatRoomLive do
        page_title: "#" <> room.name,
        joined?: Chat.joined?(room, socket.assigns.current_user),
        room: room,
-       users_typing: Map.new()
+       users_typing: Map.new(),
+       editing_message_id: -1
       )
       |> stream(:messages, messages, reset: true)
       |> assign_message_form(Chat.change_message(%Message{}))
@@ -406,7 +462,22 @@ defmodule SlaxWeb.ChatRoomLive do
     {:noreply, socket}
   end
 
+
+
+  def handle_event("edit-message", %{"id" => id}, socket) do
+    # message = Chat.get_message!(id)
+    # IO.inspect(message.id)
+    {:noreply,
+    assign(socket, :editing_message_id, id)}
+  end
+
+
+
   def handle_info({:new_message, message}, socket) do
+    if message.room_id == socket.assigns.room.id do
+      Chat.update_last_read_id(message.room, socket.assigns.current_user)
+    end
+
     socket =
       socket
       |> stream_insert(:messages, message)
@@ -420,7 +491,8 @@ defmodule SlaxWeb.ChatRoomLive do
   end
 
   def handle_info({:user_typing, user}, socket) do
-    Process.send_after(self(), :clear_writing, 3000)
+    Process.send_after(self(), :clear_writing, 2000)
+
     users_typing = Map.put(socket.assigns.users_typing, self(), user)
     {:noreply, assign(socket, :users_typing, users_typing)}
   end
