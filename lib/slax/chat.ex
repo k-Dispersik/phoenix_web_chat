@@ -102,15 +102,18 @@ defmodule Slax.Chat do
     )
   end
 
-  def list_rooms_with_joined(%User{} = user) do
-    query =
-      from r in Room,
-        left_join: m in RoomMembership,
-        on: r.id == m.room_id and m.user_id == ^user.id,
-        select: {r, not is_nil(m.id)},
-        order_by: [asc: :name]
 
-    Repo.all(query)
+  def list_joined_rooms_with_unread_counts(%User{} = user) do
+    from(room in Room,
+      join: membership in assoc(room, :memberships),
+      where: membership.user_id == ^user.id,
+      left_join: message in assoc(room, :messages),
+      on: message.id > membership.last_read_id,
+      group_by: room.id,
+      select: {room, count(message.id)},
+      order_by: [asc: room.name]
+    )
+    |> Repo.all()
   end
 
   def toggle_room_membership(room, user) do
