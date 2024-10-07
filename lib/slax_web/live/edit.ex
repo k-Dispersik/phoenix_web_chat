@@ -3,6 +3,8 @@ defmodule SlaxWeb.ChatRoomLive.Edit do
 
   alias Slax.Chat
 
+  import SlaxWeb.RoomComponents
+
   def render(assigns) do
     ~H"""
     <div class="mx-auto w-96 mt-12">
