@@ -55,6 +55,7 @@ defmodule SlaxWeb.ChatRoomLive.Index do
   end
 
   def mount(_params, _session, socket) do
+    IO.inspect(socket.assigns.current_user)
     rooms = Chat.list_joined_rooms_with_unread_counts(socket.assigns.current_user)
 
     socket
