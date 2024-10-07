@@ -323,13 +323,14 @@ defmodule Slax.Accounts do
       nil
 
   """
-  def get_user_by_reset_password_token(token) do
-    with {:ok, query} <- UserToken.verify_email_token_query(token, "reset_password"),
-         %User{} = user <- Repo.one(query) do
-      user
-    else
-      _ -> nil
-    end
+  def get_authenticated_user(email_or_username, password)
+    when is_binary(email_or_username) and is_binary(password) do
+    user =
+      User
+      |> where([u], u.email == ^email_or_username or u.username == ^email_or_username)
+      |> Repo.one()
+
+    if User.valid_password?(user, password), do: user
   end
 
   @doc """

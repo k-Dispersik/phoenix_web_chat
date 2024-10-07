@@ -11,7 +11,7 @@ defmodule SlaxWeb.ChatRoomLive.Index do
       </div>
       <div class="bg-slate-50 border rounded">
         <div id="rooms" class="divide-y" phx-update="stream">
-          <div :for={{id, {room, joined?}} <- @streams.rooms}
+          <div :for={{id, {room, _}} <- @streams.rooms}
             class="cursor-pointer p-4 flex justify-between items-center group first:rounded-t last:rounded-b"
             id={id}
             phx-click={JS.navigate(~p"/rooms/#{room}")}
