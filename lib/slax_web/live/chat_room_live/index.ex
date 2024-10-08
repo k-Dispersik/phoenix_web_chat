@@ -72,7 +72,6 @@ defmodule SlaxWeb.ChatRoomLive.Index do
   def mount(_params, _session, socket) do
     rooms = Chat.list_all_rooms_with_unread_counts(socket.assigns.current_user)
 
-    IO.inspect(rooms)
     socket
     |> assign(:page_title, "All rooms")
     |> stream_configure(:rooms, dom_id: fn {room, _} -> "rooms-#{room.id}" end)
