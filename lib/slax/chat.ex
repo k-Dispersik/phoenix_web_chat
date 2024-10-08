@@ -116,6 +116,19 @@ defmodule Slax.Chat do
     |> Repo.all()
   end
 
+  def list_all_rooms_with_unread_counts(%User{} = user) do
+    from(room in Room,
+      left_join: membership in assoc(room, :memberships),
+      on: membership.user_id == ^user.id,  # Левое соединение по пользователю
+      left_join: message in assoc(room, :messages),
+      on: message.id > coalesce(membership.last_read_id, 0),  # Сообщения после последнего прочитанного
+      group_by: room.id,
+      select: {room, count(message.id)},
+      order_by: [asc: room.name]
+    )
+    |> Repo.all()
+  end
+
   def toggle_room_membership(room, user) do
     case  get_membership(room, user) do
       %RoomMembership{} = membership ->
