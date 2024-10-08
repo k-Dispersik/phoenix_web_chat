@@ -7,6 +7,8 @@ defmodule SlaxWeb.ChatRoomLive do
   alias Slax.Chat.{Message, Room}
   alias SlaxWeb.OnlineUsers
 
+  import SlaxWeb.UserComponents
+
   defp toggle_rooms() do
     JS.toggle(to: "#rooms-toggler-chevron-down")
     |> JS.toggle(to: "#rooms-toggler-chevron-right")
@@ -115,11 +117,11 @@ defmodule SlaxWeb.ChatRoomLive do
         >
         <.icon name="hero-trash" class="h-4 w-4" />
       </button>
-     <img
+     <.user_avatar
+        user={@message.user}
         class="h-10 w-10 rounded cursor-pointer"
         phx-click="show-profile"
         phx-value-user-id={@message.user.id}
-        src={user_avatar_path(@message.user)}
       />
      <div class="ml-2">
        <div class="-mt-1">
@@ -138,14 +140,6 @@ defmodule SlaxWeb.ChatRoomLive do
      </div>
    </div>
    """
-  end
-
-  defp user_avatar_path(user) do
-    if user.avatar_path do
-      ~p"/uploads/#{user.avatar_path}"
-    else
-      ~p"/images/one_ring.jpg"
-    end
   end
 
   defp edit_message(assigns) do

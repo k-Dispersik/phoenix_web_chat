@@ -89,7 +89,7 @@
               phx-click="show-profile"
               phx-value-user-id={@current_user.id}
             >
-              <img src={~p"/images/one_ring.jpg"} class="h-8 w-8 rounded" />
+            <.user_avatar user={@current_user} class="h-8 w-8 rounded" />
               <span class="hover:underline"><%= @current_user.username %></span>
             </.link>
           </div>
