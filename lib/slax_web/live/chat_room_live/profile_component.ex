@@ -6,31 +6,31 @@ defmodule SlaxWeb.ChatRoomLive.ProfileComponent do
   import SlaxWeb.UserComponents
 
   def render(assigns) do
-    ~H"""
+     ~H"""
     <div class="flex flex-col flex-shrink-0 w-1/4 max-w-xs bg-white shadow-xl">
       <div class="flex items-center h-16 border-b border-slate-300 px-4">
         <div class="">
           <h2 class="text-lg font-bold text-gray-800">
             Profile
           </h2>
-          <button
-            class="flex items-center justify-center w-6 h-6 rounded hover:bg-gray-300 ml-auto"
-            phx-click="close-profile"
-          >
+        </div>
+        <button
+          class="flex items-center justify-center w-6 h-6 rounded hover:bg-gray-300 ml-auto"
+          phx-click="close-profile"
+        >
           <.icon name="hero-x-mark" class="w-5 h-5" />
         </button>
-        </div>
       </div>
       <div class="flex flex-col flex-grow overflow-auto p-4">
         <div class="mb-4">
-           <%= if @current_user.id == @user.id do %>
+          <%= if @current_user.id == @user.id do %>
             <.form
               for={%{}}
               phx-change="validate-avatar"
               phx-submit="submit-avatar"
               phx-target={@myself}
             >
-            <div class="mb-4">
+              <div class="mb-4">
                 <%= if Enum.any?(@uploads.avatar.entries) do %>
                   <div class="mx-auto mb-2 w-48">
                     <.live_img_preview
@@ -47,7 +47,7 @@ defmodule SlaxWeb.ChatRoomLive.ProfileComponent do
                     </button>
                   </div>
                 <% else %>
-                  <.user_avatar user={@user} />
+                  <.user_avatar user={@user} class="w-48 rounded mx-auto" />
                 <% end %>
               </div>
               <label class="block mb-2 font-semibold text-lg text-gray-800">
@@ -55,6 +55,7 @@ defmodule SlaxWeb.ChatRoomLive.ProfileComponent do
               </label>
               <.live_file_input upload={@uploads.avatar} class="w-full" />
             </.form>
+
             <hr class="mt-4" />
           <% else %>
             <.user_avatar user={@user} class="w-48 rounded mx-auto" />
@@ -66,7 +67,7 @@ defmodule SlaxWeb.ChatRoomLive.ProfileComponent do
       </div>
     </div>
     """
-  end
+   end
 
   def mount(socket) do
     socket
@@ -77,8 +78,6 @@ defmodule SlaxWeb.ChatRoomLive.ProfileComponent do
     )
     |> ok()
   end
-
-  def handle_event("validate-avatar", _, socket), do: {:noreply, socket}
 
   def handle_event("submit-avatar", _, socket) do
     if socket.assigns.user.id != socket.assigns.current_user.id do
@@ -99,4 +98,5 @@ defmodule SlaxWeb.ChatRoomLive.ProfileComponent do
     {:noreply, socket}
   end
 
-end
+  def handle_event("validate-avatar", _, socket), do: {:noreply, socket}
+ end
