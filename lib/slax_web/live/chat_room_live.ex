@@ -7,8 +7,6 @@ defmodule SlaxWeb.ChatRoomLive do
   alias Slax.Chat.{Message, Room}
   alias SlaxWeb.OnlineUsers
 
-  import SlaxWeb.RoomComponents
-
   defp toggle_rooms() do
     JS.toggle(to: "#rooms-toggler-chevron-down")
     |> JS.toggle(to: "#rooms-toggler-chevron-right")
@@ -136,9 +134,6 @@ defmodule SlaxWeb.ChatRoomLive do
   defp edit_message(assigns) do
     ~H"""
    <div id={@dom_id} class="group relative flex px-4 py-3">
-     <div class="h-10 w-10 rounded flex-shrink-0 bg-slate-300"></div>
-     <div class="ml-2">
-       <div class="-mt-1">
          <.link class="text-sm font-semibold hover:underline">
            <span><%= @message.user.username %></span>
          </.link>
@@ -162,8 +157,6 @@ defmodule SlaxWeb.ChatRoomLive do
         >
         <.icon name="hero-x-mark" class="h-8 w-8" />
       </button>
-     </div>
-   </div>
    </div>
    """
   end
@@ -235,19 +228,15 @@ defmodule SlaxWeb.ChatRoomLive do
     |> assign(rooms: rooms, timezone: timezone, users: users)
     |> assign(users_typing: Map.new(), editing_message_id: -1)
     |> assign(online_users: OnlineUsers.list())
-    |> assign_room_form(Chat.change_room(%Room{}))
     |> stream_configure(:messages,
       dom_id: fn
         %Message{id: id} -> "messages-#{id}"
         :unread_marker -> "messages-unread-marker"
         %Date{} = date -> to_string(date)
+        :editing_message_id -> socket.assigns.editing_message_id
       end
     )
     |> ok()
-  end
-
-  defp assign_room_form(socket, changeset) do
-    assign(socket, :new_room_form, to_form(changeset))
   end
 
   def handle_params(params, _session, socket) do
@@ -360,31 +349,8 @@ defmodule SlaxWeb.ChatRoomLive do
   end
 
   def handle_event("edit-message", %{"id" => id}, socket) do
+    IO.inspect(socket.assigns.editing_message_id)
     {:noreply, assign(socket, :editing_message_id, id)}
-  end
-
-  def handle_event("validate-room", %{"room" => room_params}, socket) do
-    changeset =
-      socket.assigns.room
-      |> Chat.change_room(room_params)
-      |> Map.put(:action, :validate)
-
-    {:noreply, assign_room_form(socket, changeset)}
-  end
-
-  def handle_event("save-room", %{"room" => room_params}, socket) do
-    case Chat.create_room(room_params) do
-      {:ok, room} ->
-        Chat.join_room!(room, socket.assigns.current_user)
-
-        {:noreply,
-         socket
-         |> put_flash(:info, "Created room")
-         |> push_navigate(to: ~p"/rooms/#{room}")}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_room_form(socket, changeset)}
-    end
   end
 
   def handle_event("join-room", _, socket) do
