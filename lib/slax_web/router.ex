@@ -17,6 +17,13 @@ defmodule SlaxWeb.Router do
     plug :accepts, ["json"]
   end
 
+  scope "/", SlaxWeb do
+    pipe_through [:browser]
+
+    # get "/home", PageController, :home
+    live "/home", PageLive
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", SlaxWeb do
   #   pipe_through :api
@@ -78,7 +85,7 @@ defmodule SlaxWeb.Router do
         live "/rooms/:id/new", ChatRoomLive, :new
         live "/rooms/:id/edit", ChatRoomLive.Edit
         live "/users/confirm/:token", UserConfirmationLive, :edit
-      live "/users/confirm", UserConfirmationInstructionsLive, :new
+        live "/users/confirm", UserConfirmationInstructionsLive, :new
     end
   end
 end
