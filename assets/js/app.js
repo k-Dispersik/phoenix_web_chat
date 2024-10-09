@@ -23,10 +23,12 @@ import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import RoomMessages from "./hooks/RoomMessages"
 import ChatMessageTextarea from "./hooks/ChatMessageTextarea"
+import Thread from "./hooks/Thread"
 
 const hooks = {
   RoomMessages,
   ChatMessageTextarea,
+  Thread,
 }
 
 
