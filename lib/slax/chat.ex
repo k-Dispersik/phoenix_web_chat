@@ -200,4 +200,22 @@ defmodule Slax.Chat do
     end
   end
 
+  def change_reply(reply, attrs \\ %{}) do
+    Reply.changeset(reply, attrs)
+  end
+
+  def create_reply(%Message{} = message, attrs, user) do
+    with {:ok, reply} <-
+      %Reply{message: message, user: user}
+      |> Reply.changeset(attrs)
+      |> Repo.insert() do
+
+      message = get_message!(reply.message_id)
+
+      Phoenix.PubSub.broadcast!(@pubsub, topic(message.room_id), {:new_reply, message})
+
+      {:ok, reply}
+      end
+  end
+
 end
