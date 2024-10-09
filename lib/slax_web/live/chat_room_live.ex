@@ -5,9 +5,11 @@ defmodule SlaxWeb.ChatRoomLive do
   alias Slax.Accounts.User
   alias Slax.Chat
   alias Slax.Chat.{Message, Room}
+  alias SlaxWeb.ChatRoomLive.ThreadComponent
   alias SlaxWeb.OnlineUsers
 
   import SlaxWeb.UserComponents
+  import SlaxWeb.ChatComponents
 
   defp toggle_rooms() do
     JS.toggle(to: "#rooms-toggler-chevron-down")
@@ -50,7 +52,6 @@ defmodule SlaxWeb.ChatRoomLive do
   attr :on_click, JS, required: true
   attr :text, :string, required: true
 
-
   defp toggler(assigns) do
     ~H"""
     <button id={@dom_id} phx-click={@on_click} class="flex items-center flex-grow focus:outline-none">
@@ -86,61 +87,12 @@ defmodule SlaxWeb.ChatRoomLive do
     """
   end
 
-
   attr :current_user, User, required: true
-  attr :dom_id, :string, required: true
-  attr :message, Message, required: true
-  attr :timezone, :string, required: true
   attr :users_typing, :map, default: Map.new()
   attr :joined?, :boolean, default: false
   attr :editing_message, :string, required: false
   attr :editing_message_id, :integer, default: -1
   attr :unread_count, :integer, required: false
-
-  defp message(assigns) do
-   ~H"""
-   <div id={@dom_id} class="group relative flex px-4 py-3">
-    <button
-        :if={@current_user.id == @message.user_id}
-        class="absolute top-4 right-12 text-blue-500 hover:text-violet-800 cursor-pointer hidden group-hover:block"
-        phx-click="edit-message"
-        phx-value-id={@message.id}
-        >
-        <.icon name="hero-pencil-square" class="h-4 w-4" />
-      </button>
-    <button
-        :if={@current_user.id == @message.user_id}
-        class="absolute top-4 right-4 text-red-500 hover:text-red-800 cursor-pointer hidden group-hover:block"
-        data-confirm="Are you sure?"
-        phx-click="delete-message"
-        phx-value-id={@message.id}
-        >
-        <.icon name="hero-trash" class="h-4 w-4" />
-      </button>
-     <.user_avatar
-        user={@message.user}
-        class="h-10 w-10 rounded cursor-pointer"
-        phx-click="show-profile"
-        phx-value-user-id={@message.user.id}
-      />
-     <div class="ml-2">
-       <div class="-mt-1">
-         <.link
-            phx-click="show-profile"
-            phx-value-user-id={@message.user.id}
-            class="text-sm font-semibold hover:underline"
-          >
-            <%= @message.user.username %>
-         </.link>
-         <span :if={@timezone} class="ml-1 text-xs text-gray-500">
-            <%= message_timestamp(@message, @timezone) %>
-          </span>
-         <p class="text-sm"><%= @message.body %></p>
-       </div>
-     </div>
-   </div>
-   """
-  end
 
   defp edit_message(assigns) do
     ~H"""
@@ -183,12 +135,6 @@ defmodule SlaxWeb.ChatRoomLive do
       <%= @count %>
     </span>
     """
-  end
-
-  defp message_timestamp(message, timezone) do
-    message.inserted_at
-    |> Timex.Timezone.convert(timezone)
-    |> Timex.format!("%-l:%M %p", :strftime)
   end
 
   defp users_typing(assigns) do
@@ -402,7 +348,6 @@ defmodule SlaxWeb.ChatRoomLive do
     |> noreply()
   end
 
-
   def handle_event("join-room", _, socket) do
     current_user = socket.assigns.current_user
     Chat.join_room!(socket.assigns.room, current_user)
@@ -418,11 +363,21 @@ defmodule SlaxWeb.ChatRoomLive do
 
   def handle_event("show-profile", %{"user-id" => user_id}, socket) do
     user = Accounts.get_user!(user_id)
-    {:noreply, assign(socket, :profile, user)}
+    {:noreply, assign(socket, profile: user, thread: nil)}
   end
 
   def handle_event("close-profile", _, socket) do
     {:noreply, assign(socket, :profile, nil)}
+  end
+
+  def handle_event("close-thread", _, socket) do
+    {:noreply, assign(socket, :thread, nil)}
+  end
+
+  def handle_event("show-thread", %{"id" => message_id}, socket) do
+    message = Chat.get_message!(message_id)
+
+    socket |> assign(profile: nil, thread: message) |> noreply()
   end
 
   def handle_info({:new_message, message}, socket) do

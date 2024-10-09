@@ -57,7 +57,10 @@ defmodule Slax.Chat do
   end
 
   def get_message!(id) do
-    Repo.get(Message, id)
+    Message
+    |> where([m], m.id == ^id)
+    |> preload(:user)
+    |> Repo.one!()
   end
 
   def change_message(message, attrs \\ %{}) do
