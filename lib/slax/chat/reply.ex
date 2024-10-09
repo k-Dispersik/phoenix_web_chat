@@ -1,23 +1,21 @@
-defmodule Slax.Chat.Message do
+defmodule Slax.Chat.Reply do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Slax.Accounts.User
-  alias Slax.Chat.{Reply, Room}
 
-  schema "messages" do
+  alias Slax.Chat.Message
+  alias Slax.Accounts.User
+
+  schema "replies" do
     field :body, :string
-    # field :user_id, :id
-    # field :room_id, :id
-    belongs_to :room, Room
+    belongs_to :message, Message
     belongs_to :user, User
-    has_many :replies, Reply
 
     timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def changeset(message, attrs) do
-    message
+  def changeset(reply, attrs) do
+    reply
     |> cast(attrs, [:body])
     |> validate_required([:body])
   end
