@@ -2,7 +2,6 @@ defmodule Slax.Chat.Reaction do
   use Ecto.Schema
   import Ecto.Changeset
 
-
   alias Slax.Accounts.User
   alias Slax.Chat.Message
 
