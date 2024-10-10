@@ -55,7 +55,7 @@ defmodule Slax.Chat do
     |> preload_message_user_and_replies()
     |> Repo.paginate(
       after: opts[:after],
-      limit: 3,
+      limit: 30,
       cursor_fields: [inserted_at: :desc, id: :desc]
     )
   end

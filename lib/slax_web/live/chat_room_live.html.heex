@@ -105,15 +105,6 @@
         </li>
       </ul>
     </div>
-    <div :if={@message_cursor} class="flex justify-around my-2">
-      <button
-        id="load-more-button"
-        phx-click="load-more-messages"
-        class="border border-green-200 bg-green-50 py-1 px-3 rounded"
-      >
-        Load more
-      </button>
-    </div>
     <div
        id="room-messages"
        class="flex flex-col flex-grow overflow-auto"

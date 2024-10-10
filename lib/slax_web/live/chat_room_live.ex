@@ -409,7 +409,7 @@ defmodule SlaxWeb.ChatRoomLive do
 
     socket
     |> stream_message_page(page)
-    |> noreply()
+    |> reply(%{can_load_more: !is_nil(page.metadata.after)})
   end
 
   def handle_info({:new_message, message}, socket) do
