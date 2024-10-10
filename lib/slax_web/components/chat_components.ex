@@ -17,7 +17,7 @@ defmodule SlaxWeb.ChatComponents do
     <div id={@dom_id} class="group relative flex px-4 py-3">
       <div
         :if={!@in_thread? || @current_user.id == @message.user_id}
-        class="max-w-lg absolute top-4 right-4 hidden group-hover:block bg-white shadow-sm px-2 pb-1 rounded border border-px border-slate-300 gap-1"
+        class="max-w-lg absolute top-4 right-4 hidden group-hover:block bg-white shadow-sm px-2 pb-1 rounded border border-px border-sky-300 gap-1"
       >
       <button
           :if={!@in_thread?}

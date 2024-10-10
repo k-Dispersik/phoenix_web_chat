@@ -3,3 +3,21 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+
+/* В вашем файле custom.css */
+.scrollbar-custom::-webkit-scrollbar {
+    width: 12px; /* Ширина скроллбара */
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background-color: #1d4ed8; /* Цвет ползунка */
+    border-radius: 6px; /* Скругление ползунка */
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background-color: #2563eb; /* Цвет ползунка при наведении */
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background-color: #f3f4f6; /* Цвет фона скроллбара */
+  }

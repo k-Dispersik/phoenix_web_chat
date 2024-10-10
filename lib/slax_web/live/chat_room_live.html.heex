@@ -145,7 +145,7 @@
               class="flex items-center border-2 border-slate-300 rounded-sm p-1"
             >
             <textarea
-              class="flex-grow text-sm px-3 border-l border-slate-300 mx-1 resize-none"
+              class="flex-grow text-sm px-3 rounded-lg border-l border-slate-300 mx-1 resize-none"
               cols=""
               id="chat-message-textarea"
               name={@new_message_form[:body].name}
@@ -153,7 +153,7 @@
               phx-debounce
               phx-hook="ChatMessageTextarea"
               rows="1"
-            ><%= Phoenix.HTML.Form.normalize_value("textarea", @new_message_form[:body].value) %></textarea>
+            ><%= Phoenix.HTML.Form.normalize_value("textarea", "") %></textarea>
             <button class="flex-shrink flex items-center justify-center h-6 w-6 rounded hover:bg-slate-200">
               <.icon name="hero-paper-airplane" class="h-4 w-4" />
             </button>

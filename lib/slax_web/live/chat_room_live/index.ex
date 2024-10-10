@@ -14,7 +14,18 @@ defmodule SlaxWeb.ChatRoomLive.Index do
         >
           Create room
         </button>
-        </div>
+      </div>
+
+      <div class="mb-4">
+        <input
+          type="text"
+          placeholder="Search rooms..."
+          phx-debounce="300"
+          phx-keyup="search_rooms"
+          class="border border-gray-300 rounded p-2 w-full"
+        />
+      </div>
+
       <div class="bg-slate-50 border rounded">
         <div id="rooms" class="divide-y" phx-update="stream">
           <div :for={{id, {room, _}} <- @streams.rooms}
@@ -42,7 +53,7 @@ defmodule SlaxWeb.ChatRoomLive.Index do
                 <% end %>
               </div>
             </div>
-          <button
+            <button
               class="opacity-0 group-hover:opacity-100 bg-white hover:bg-gray-100 border border-gray-400 text-gray-700 px-3 py-1.5 w-24 rounded-sm font-bold"
               phx-click="toggle-room-membership"
               phx-value-id={room.id}
@@ -132,6 +143,7 @@ defmodule SlaxWeb.ChatRoomLive.Index do
     socket
     |> assign(num_pages: Chat.count_room_pages())
     |> assign(:page_title, "All rooms")
+    |> assign(:search_term, "")
     |> stream_configure(:rooms, dom_id: fn {room, _} -> "rooms-#{room.id}" end)
     |> ok()
   end
@@ -147,9 +159,14 @@ defmodule SlaxWeb.ChatRoomLive.Index do
     |> noreply()
   end
 
-  # def handle_event("view-room", %{"id" => id}, socket) do
-  #   {:noreply, push_navigate(socket, to: ~p"/rooms/#{id}")}
-  # end
+  def handle_event("search_rooms", %{"value" => search_term}, socket) do
+    rooms = Chat.search_rooms(search_term)
+
+    socket
+    |> assign(search_term: search_term)
+    |> stream(:rooms, rooms, reset: true)
+    |> noreply()
+  end
 
   def handle_event("toggle-room-membership", %{"id" => id}, socket) do
     {room, joined?} =
@@ -157,8 +174,8 @@ defmodule SlaxWeb.ChatRoomLive.Index do
       |> Chat.get_room!()
       |> Chat.toggle_room_membership(socket.assigns.current_user)
 
-      socket
-      |> stream_insert(:rooms, {room, joined?})
-      |> noreply()
+    socket
+    |> stream_insert(:rooms, {room, joined?})
+    |> noreply()
   end
 end

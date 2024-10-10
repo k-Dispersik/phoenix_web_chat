@@ -20,6 +20,15 @@ defmodule Slax.Chat do
     end
   end
 
+  def search_rooms(search_term) do
+    from(r in Room,
+      where: ilike(r.name, ^"%#{search_term}%"),
+      order_by: r.name
+    )
+    |> Repo.all()
+    |> Enum.map(&{&1, false})
+  end
+
   def remove_reaction(emoji, %Message{} = message, %User{} = user) do
     with %Reaction{} = reaction <-
            Repo.one(

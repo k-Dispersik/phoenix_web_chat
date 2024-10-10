@@ -143,7 +143,7 @@ defmodule SlaxWeb.ChatRoomLive do
     <%= if map_size(@users_typing) > 0 do %>
       <span class="text-green-600"> Users typing:
         <%= for {_pid, user} <- @users_typing do %>
-          <%= user.email %>,
+          <%=  user.username %>,
         <% end %>
       </span>
     <% else %>
@@ -157,7 +157,7 @@ defmodule SlaxWeb.ChatRoomLive do
     <.link
       class={[
         "flex items-center h-8 text-sm pl-8 pr-3",
-        (@active && "bg-slate-300") || "hover:bg-slate-300"]}
+        (@active && "bg-sky-200") || "hover:bg-sky-200"]}
         patch={~p"/rooms/#{@room}"}>
       <.icon name="hero-hashtag" class="h-4 w-4" />
       <span class={["ml-2 leading-none", @active && "font-bold"]}>
@@ -476,13 +476,13 @@ defmodule SlaxWeb.ChatRoomLive do
   end
 
   def handle_info({:user_typing, user}, socket) do
-    Process.send_after(self(), :clear_writing, 2000)
+    Process.send_after(self(), :clear_typing, 2000)
 
     users_typing = Map.put(socket.assigns.users_typing, self(), user)
     {:noreply, assign(socket, :users_typing, users_typing)}
   end
 
-  def handle_info(:clear_writing, socket) do
+  def handle_info(:clear_typing, socket) do
     users_typing = Map.delete(socket.assigns.users_typing, self())
     {:noreply, assign(socket, :users_typing, users_typing)}
   end
