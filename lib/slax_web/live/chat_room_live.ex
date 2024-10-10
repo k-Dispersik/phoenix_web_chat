@@ -93,6 +93,7 @@ defmodule SlaxWeb.ChatRoomLive do
   attr :editing_message, :string, required: false
   attr :editing_message_id, :integer, default: -1
   attr :unread_count, :integer, required: false
+  attr :edit_message_form, :any, required: false
 
   defp edit_message(assigns) do
     ~H"""
@@ -101,7 +102,7 @@ defmodule SlaxWeb.ChatRoomLive do
         for={@edit_message_form}
         phx-change="validate-message"
         phx-submit="submit-edit-message"
-        class="flex items-center border-2 border-slate-300 rounded-sm p-1"
+        class="flex items-center border-2 border-lg border-blue-500 rounded-sm p-1"
       >
       <textarea
         class="flex-grow text-sm px-3 border-l border-slate-300 mx-1 resize-none"
@@ -116,8 +117,8 @@ defmodule SlaxWeb.ChatRoomLive do
               <.icon name="hero-check" class="h-8 w-8" />
             </button>
             <button class="flex-shrink flex items-center justify-center h-6 w-6 rounded hover:bg-slate-200"
-            phx-click="edit-message-cancel"
-            phx-value-id={@editing_message.id}>
+            phx-click="cancel-edit-message"
+            >
               <.icon name="hero-x-mark" class="h-8 w-8" />
             </button>
       </.form>
@@ -252,18 +253,6 @@ defmodule SlaxWeb.ChatRoomLive do
     |> assign(:message_cursor, page.metadata.after)
   end
 
-  def handle_event("load-more-messages", _, socket) do
-    page =
-      Chat.list_messages_in_room(
-        socket.assigns.room,
-        after: socket.assigns.message_cursor
-      )
-
-    socket
-    |> stream_message_page(page)
-    |> noreply()
-  end
-
   defp insert_date_dividers(messages, nil), do: messages
 
   defp insert_date_dividers(messages, timezone) do
@@ -298,7 +287,6 @@ defmodule SlaxWeb.ChatRoomLive do
   end
 
   defp assign_edit_message_form(socket, changeset) do
-    IO.puts("Edit form")
     assign(socket, :edit_message_form, to_form(changeset))
   end
 
@@ -373,7 +361,7 @@ defmodule SlaxWeb.ChatRoomLive do
     end
   end
 
-  def handle_event("edit-message-cancel", _, socket) do
+  def handle_event("cancel-edit-message", _, socket) do
     socket
     |> assign(:editing_message_id, -1)
     |> assign(editing_message: nil)
@@ -410,6 +398,18 @@ defmodule SlaxWeb.ChatRoomLive do
     message = Chat.get_message!(message_id)
 
     socket |> assign(profile: nil, thread: message) |> noreply()
+  end
+
+  def handle_event("load-more-messages", _params, socket) do
+    page =
+      Chat.list_messages_in_room(
+        socket.assigns.room,
+        after: socket.assigns.message_cursor
+      )
+
+    socket
+    |> stream_message_page(page)
+    |> noreply()
   end
 
   def handle_info({:new_message, message}, socket) do

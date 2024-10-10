@@ -74,7 +74,7 @@ defmodule SlaxWeb.UserResetPasswordLive do
   end
 
   defp assign_user_and_token(socket, %{"token" => token}) do
-    if user = Accounts.get_user_by_reset_password_token(token) do
+    if user = Accounts.get_user_by_session_token(token) do
       assign(socket, user: user, token: token)
     else
       socket
