@@ -17,8 +17,21 @@ defmodule SlaxWeb.ChatComponents do
     <div id={@dom_id} class="group relative flex px-4 py-3">
       <div
         :if={!@in_thread? || @current_user.id == @message.user_id}
-        class="absolute top-4 right-4 hidden group-hover:block bg-white shadow-sm px-2 pb-1 rounded border border-px border-slate-300 gap-1"
+        class="max-w-lg absolute top-4 right-4 hidden group-hover:block bg-white shadow-sm px-2 pb-1 rounded border border-px border-slate-300 gap-1"
       >
+      <button
+          :if={!@in_thread?}
+          phx-click={
+            JS.dispatch(
+              "show_emoji_picker",
+              detail: %{message_id: @message.id}
+            )
+          }
+          class="reaction-menu-button text-slate-500 hover:text-slate-600 cursor-pointer"
+        >
+          <.icon name="hero-face-smile" class="h-5 w-5" />
+        </button>
+
         <button
           :if={!@in_thread?}
           phx-click="show-thread"
@@ -29,7 +42,7 @@ defmodule SlaxWeb.ChatComponents do
         </button>
         <button
           :if={@current_user.id == @message.user_id}
-          class="text-blue-500 hover:text-blue-800 cursor-pointer hidden group-hover:block"
+          class="reaction-menu-button text-slate-500 hover:text-slate-600 cursor-pointer"
           phx-click="edit-message"
           phx-value-id={@message.id}
           >
@@ -37,7 +50,7 @@ defmodule SlaxWeb.ChatComponents do
         </button>
         <button
           :if={@current_user.id == @message.user_id}
-          class="text-red-500 hover:text-red-800 cursor-pointer hidden group-hover:block"
+          class="reaction-menu-button text-slate-500 hover:text-slate-600 cursor-pointer"
           data-confirm="Are you sure?"
           phx-click="delete-message"
           phx-value-id={@message.id}
