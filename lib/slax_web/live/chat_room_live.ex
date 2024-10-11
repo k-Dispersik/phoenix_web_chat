@@ -345,19 +345,30 @@ defmodule SlaxWeb.ChatRoomLive do
   end
 
   def handle_event("submit-edit-message", %{"message" => message_params}, %{assigns: %{editing_message: message}} = socket) do
-    case Chat.update_message(message, message_params) do
-      {:ok, updated_message} ->
+    unless message == nil do
+      if message.body == message_params["body"] do
+        socket
+        |> assign(:editing_message_id, -1)
+        |> assign(editing_message: nil)
+        |> noreply()
+      else
+        case Chat.update_message(message, message_params) do
+          {:ok, updated_message} ->
 
-        {:noreply,
-         socket
-         |> stream_insert(:messages, updated_message)
-         |> assign(editing_message: nil)
-         |> assign(editing_message_id: -1)
-         |> put_flash(:info, "Message updated successfully!")}
+            {:noreply,
+            socket
+            |> stream_insert(:messages, updated_message)
+            |> assign(editing_message: nil)
+            |> assign(editing_message_id: -1)
+            |> put_flash(:info, "Message updated successfully!")}
 
 
-      {:error, changeset} ->
-        {:noreply, assign(socket, :edit_message_form, to_form(changeset))}
+          {:error, changeset} ->
+            {:noreply, assign(socket, :edit_message_form, to_form(changeset))}
+        end
+      end
+    else
+      noreply(socket)
     end
   end
 
