@@ -3,6 +3,7 @@ defmodule Slax.Accounts.User do
   import Ecto.Changeset
 
   alias Slax.Chat.{Reaction, Room, RoomMembership}
+  alias Slax.Accounts.PaymentHistories
 
   schema "users" do
     field :email, :string
@@ -12,7 +13,9 @@ defmodule Slax.Accounts.User do
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
     field :avatar_path, :string
+    field :subscription_type, :string, default: "free"
 
+    has_many :payment_histories, PaymentHistories
     has_many :reactions, Reaction
     many_to_many :rooms, Room, join_through: RoomMembership
 
