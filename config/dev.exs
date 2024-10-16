@@ -27,7 +27,7 @@ config :slax, SlaxWeb.Endpoint,
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:slax, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:slax, ~w(--watch)]}
-  ]
+  ],
 
 # ## SSL Support
 #
@@ -41,12 +41,12 @@ config :slax, SlaxWeb.Endpoint,
 #
 # The `http:` config above can be replaced with:
 #
-#     https: [
-#       port: 4001,
-#       cipher_suite: :strong,
-#       keyfile: "priv/cert/selfsigned_key.pem",
-#       certfile: "priv/cert/selfsigned.pem"
-#     ],
+    https: [
+      port: 4001,
+      cipher_suite: :strong,
+      keyfile: "priv/cert/selfsigned_key.pem",
+      certfile: "priv/cert/selfsigned.pem"
+    ]
 #
 # If desired, both `http:` and `https:` keys can be
 # configured to run both http and https servers on
@@ -83,3 +83,6 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+config :slax, :api_keys,
+  acoin: "Bearer XCP.okTAcx7vuVDaFtwGzwZSZa7m8K787Qo22-YiUjWQAcQnrAAdZEQC2v1rQa64FA_hzkstBKsvsXewmftfu8vvJ72E8vcensQGkkN-lUaa9YIHOrmARhOanD2qCKX_BJZ3D1s"
