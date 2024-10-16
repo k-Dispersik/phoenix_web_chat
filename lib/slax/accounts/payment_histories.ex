@@ -1,6 +1,10 @@
 defmodule Slax.Accounts.PaymentHistories do
   use Ecto.Schema
+
+  alias Slax.Accounts.User
+
   import Ecto.Changeset
+
 
   schema "payment_histories" do
 
@@ -10,7 +14,7 @@ defmodule Slax.Accounts.PaymentHistories do
     field :status, :string
     field :success, :boolean
 
-    belongs_to :user, Slax.Accounts.User
+    belongs_to :user, User
 
     timestamps(type: :utc_datetime)
   end

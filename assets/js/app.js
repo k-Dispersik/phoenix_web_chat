@@ -24,8 +24,10 @@ import topbar from "../vendor/topbar"
 import RoomMessages from "./hooks/RoomMessages"
 import ChatMessageTextarea from "./hooks/ChatMessageTextarea"
 import Thread from "./hooks/Thread"
+import SubHook from "./hooks/SubHook"
 
 const hooks = {
+  SubHook,
   RoomMessages,
   ChatMessageTextarea,
   Thread,

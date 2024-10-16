@@ -25,9 +25,11 @@ defmodule SlaxWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", SlaxWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", SlaxWeb do
+    pipe_through :api
+
+    post "/transactions/notify", NotifyController, :notify
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:slax, :dev_routes) do
@@ -86,6 +88,12 @@ defmodule SlaxWeb.Router do
         live "/rooms/:id/edit", ChatRoomLive.Edit
         live "/users/confirm/:token", UserConfirmationLive, :edit
         live "/users/confirm", UserConfirmationInstructionsLive, :new
+        # phone redemption
+        live "/transactions/create", PhoneRedemptionLive
+        live "/transactions/notify", PhoneRedemptionLive, :notify
+        live "/transactions/cancel", PhoneRedemptionLive, :cancel
+        live "/transactions/error", PhoneRedemptionLive, :error
+        live "/transactions/success", PhoneRedemptionLive, :success
     end
   end
 end
