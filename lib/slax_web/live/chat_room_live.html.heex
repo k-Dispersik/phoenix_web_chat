@@ -2,7 +2,7 @@
     <div class="flex justify-between items-center flex-shrink-0 h-20 border-b border-slate-300 px-4">
       <div class="flex flex-col gap-1.5">
         <h1 class="text-lg font-bold text-red-800">
-          <a href="/rooms" phx-click={JS.transition("fade-in", to: "#my-element")}>Slax</a>
+          <.link patch={~p"/rooms"}>Slax</.link>
         </h1>
       </div>
     </div>
@@ -136,7 +136,7 @@
        <% end %>
      </div>
     <div :if={@joined?} class="h-12 bg-white px-4 pb-4">
-            <%= if 0 > @editing_message_id do %>
+            <%= if !@editing_message do %>
             <.form
               id="new-message-form"
               for={@new_message_form}
@@ -163,7 +163,6 @@
               current_user={@current_user}
               edit_message_form={@edit_message_form}
               editing_message={@editing_message}
-              editing_message_id={@editing_message_id}
             />
           <% end %>
      </div>

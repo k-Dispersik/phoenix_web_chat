@@ -91,7 +91,6 @@ defmodule SlaxWeb.ChatRoomLive do
   attr :users_typing, :map, default: Map.new()
   attr :joined?, :boolean, default: false
   attr :editing_message, :string, required: false
-  attr :editing_message_id, :integer, default: -1
   attr :unread_count, :integer, required: false
   attr :edit_message_form, :any, required: false
 
@@ -187,7 +186,7 @@ defmodule SlaxWeb.ChatRoomLive do
     socket
     |> assign(rooms: rooms, timezone: timezone, users: users)
     |> assign(users_typing: Map.new())
-    |> assign(editing_message_id: -1, editing_message: nil)
+    |> assign(editing_message: nil)
     |> assign(online_users: OnlineUsers.list())
     |> stream_configure(:messages,
       dom_id: fn
@@ -338,43 +337,42 @@ defmodule SlaxWeb.ChatRoomLive do
     changeset = Chat.change_message(message)
 
     socket
-    |> assign(:editing_message_id, id)
     |> assign(editing_message: message)
     |> assign_edit_message_form(changeset)
     |> noreply()
   end
 
-  def handle_event("submit-edit-message", %{"message" => message_params}, %{assigns: %{editing_message: message}} = socket) do
-    unless message == nil do
-      if message.body == message_params["body"] do
-        socket
-        |> assign(:editing_message_id, -1)
-        |> assign(editing_message: nil)
-        |> noreply()
-      else
-        case Chat.update_message(message, message_params) do
-          {:ok, updated_message} ->
+  def handle_event("submit-edit-message",
+        %{"message" => %{"body" => params_message_body}},
+        %{assigns: %{editing_message: _message = %{body: message_body}}} = socket
+      ) when params_message_body == message_body do
+    socket
+    |> assign(editing_message: nil)
+    |> noreply()
+  end
 
-            {:noreply,
-            socket
-            |> stream_insert(:messages, updated_message)
-            |> assign(editing_message: nil)
-            |> assign(editing_message_id: -1)
-            |> put_flash(:info, "Message updated successfully!")}
+  def handle_event("submit-edit-message", message_params, %{assigns: %{editing_message: %{} = message}} = socket) do
+    case Chat.update_message(message, message_params) do
+      {:ok, updated_message} ->
+
+        {:noreply,
+          socket
+          |> stream_insert(:messages, updated_message)
+          |> assign(editing_message: nil)
+          |> put_flash(:info, "Message updated successfully!")}
 
 
-          {:error, changeset} ->
-            {:noreply, assign(socket, :edit_message_form, to_form(changeset))}
-        end
-      end
-    else
-      noreply(socket)
+      {:error, changeset} ->
+        {:noreply, assign(socket, :edit_message_form, to_form(changeset))}
     end
+  end
+
+  def handle_event("submit-edit-message", _params, socket) do
+    noreply(socket)
   end
 
   def handle_event("cancel-edit-message", _, socket) do
     socket
-    |> assign(:editing_message_id, -1)
     |> assign(editing_message: nil)
     |> noreply()
   end
