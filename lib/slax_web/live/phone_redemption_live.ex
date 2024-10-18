@@ -75,11 +75,8 @@ defmodule SlaxWeb.PhoneRedemptionLive do
   def handle_event("submit-redemption", %{"phone_form" => %{"phone_number" => phone_number}}, socket) do
     sub_level = socket.assigns.sub_level
     billing_cycle = socket.assigns.billing_cycle
+    selected_price = socket.assigns.selected_price
 
-    selected_price = socket.assigns.price_list[billing_cycle][sub_level]
-    IO.inspect(sub_level, label: "sub_level")
-    IO.inspect(billing_cycle, label: "billing_cycle")
-    IO.inspect(selected_price, label: "selected_price")
     amount = Decimal.to_integer(selected_price) * 100
 
     sub =
@@ -104,7 +101,10 @@ defmodule SlaxWeb.PhoneRedemptionLive do
   end
 
   def handle_event("buy-click", %{"sub_level" => sub_level}, socket) do
+    billing_cycle = socket.assigns.billing_cycle
+    IO.inspect(socket.assigns.billing_cycle)
     socket
+      |> assign(:selected_price, socket.assigns.price_list[billing_cycle][sub_level])
       |> assign(:sub_level, sub_level)
       |> noreply()
   end

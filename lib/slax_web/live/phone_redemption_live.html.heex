@@ -172,12 +172,21 @@
               </div>
             </div>
           </div>
+          <%= if @selected_price do %>
+          <p class="text-4xl font-bold text-center bg-gradient-to-r from-green-800 to-green-800 bg-clip-text text-transparent">
+            You chose: <%= @selected_price %> ZAR (<%= @sub_level %>/<%= @billing_cycle %>)  
+            </p>
             <.redemption_form
             form={@form}
             billing_cycle={@billing_cycle}
             price_list={@price_list}
             >
             </.redemption_form>
+          <% else %> 
+            <p class="text-4xl font-bold text-center bg-gradient-to-r from-purple-500 to-indigo-500 bg-clip-text text-transparent">
+              Choose a subscription plan
+            </p>
+          <% end %>
         </div>
       </div>
     </div>

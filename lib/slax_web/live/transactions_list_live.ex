@@ -7,13 +7,15 @@ defmodule SlaxWeb.TransactionsListLive do
     ~H"""
     <div class="w-full h-screen flex justify-center">
     <div class="w-full max-w-lg">
-        <button
-        class="btn btn-primary flex items-center text-green-700 border border-green-600 py-2 px-4 gap-2 rounded inline-flex items-center"
+    <h1 class="text-2xl font-bold text-center mb-4">
+    Payment History
+    </h1>
+     <button
+        class="mb-4 btn btn-primary flex items-center text-green-700 border border-green-600 py-2 px-4 gap-2 rounded inline-flex items-center"
          onclick="history.back()">
          <.icon name="hero-backward" class="h-4 w-4" />
          Back
         </button>
-    <h1 class="text-2xl font-bold text-center mb-4">Payment History</h1>
         <.transactions_item
         :for={transaction <- @transactions_list}
         transaction={transaction}

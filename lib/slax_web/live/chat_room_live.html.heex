@@ -120,11 +120,11 @@
             </div>
         <% :access_limited_marker -> %>
         <div id={dom_id} class="mb-4 w-full flex flex-col items-center gap-3 pr-5">
+              <div class="text-sm font-bold text-indigo-800">Access limited. Upgrade your subscription to view more messages.</div>
               <button type="button" 
               class="bg-gradient-to-r from-green-800 to-indigo-500 py-2 px-3 text-lg font-medium text-center text-white rounded-full hover:bg-gradient-to-r hover:from-green-500 hover:to-indigo-600">
                 <.link patch={~p"/transactions/create"}> Extend limit </.link>
             </button>
-              <div class="text-sm font-bold text-indigo-800">Access limited. Upgrade your subscription to view more messages.</div>
               <div class="w-full h-px grow bg-red-500"></div>
             </div>
         <% %Message{} -> %>
