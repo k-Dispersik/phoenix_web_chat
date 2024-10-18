@@ -171,6 +171,10 @@ defmodule SlaxWeb.ChatRoomLive do
     rooms = Chat.list_joined_rooms_with_unread_counts(socket.assigns.current_user)
     users = Accounts.list_users()
 
+    if !Accounts.subscription_active?(socket.assigns.current_user) do
+      Accounts.reset_subscription_plan(socket.assigns.current_user)
+    end
+
     timezone = get_connect_params(socket)["timezone"]
 
     if connected?(socket) do
@@ -193,6 +197,7 @@ defmodule SlaxWeb.ChatRoomLive do
         %Message{id: id} -> "messages-#{id}"
         :unread_marker -> "messages-unread-marker"
         %Date{} = date -> to_string(date)
+        :access_limited_marker -> "access_limited_marker"
       end
     )
     |> ok()
@@ -245,6 +250,7 @@ defmodule SlaxWeb.ChatRoomLive do
       |> Enum.reverse()
       |> insert_date_dividers(socket.assigns.timezone)
       |> maybe_insert_unread_marker(last_read_id)
+      |> insert_access_limit(socket.assigns.current_user.subscription_type)
       |> Enum.reverse()
 
     socket
@@ -278,6 +284,22 @@ defmodule SlaxWeb.ChatRoomLive do
       read
     else
       read ++ [:unread_marker | unread]
+    end
+  end
+
+  defp insert_access_limit(messages, user_access_level) do
+    max_messages =
+      case user_access_level do
+        "free" -> 3
+        "basic" -> 10
+        "advanced" -> nil
+      end
+
+    if max_messages && max_messages < length(messages) do
+      {limited_messages, _} = Enum.split(messages, max_messages + 1)
+      [:access_limited_marker] ++ limited_messages
+    else
+      messages
     end
   end
 

@@ -12,7 +12,6 @@ defmodule SlaxWeb.NotifyController do
      "status" => status,
      "merchant_reference" => merchant_reference}) do
 
-    # IO.inspect(%{transaction_id: transaction_id, amount: amount, currency: currency, status: status, merchant_reference: merchant_reference}, label: "Received notification")
     [username, subscription_id] = String.split(merchant_reference, "|")
 
     case Accounts.get_user_by_username(username) do
@@ -31,15 +30,19 @@ defmodule SlaxWeb.NotifyController do
           user_id: user.id
         })
 
-        case Accounts.update_subscrabtion_plan(user.id, subscription_id) do
-          {:ok, _} -> save_notify(conn, changeset)
-          {:error, _} -> send_resp(conn, 500, "Something went wrong.")
-        end
+        handle_subscription_update(conn, user, subscription_id, changeset)
     end
   end
 
   def notify(conn, _params) do
     send_resp(conn, 400, "Bad Request")
+  end
+
+  defp handle_subscription_update(conn, user, subscription_id, changeset) do
+    case Accounts.update_subscription_plan(user, subscription_id) do
+      {:ok, _} -> save_notify(conn, changeset)
+      {:error, _} -> send_resp(conn, 500, "Something went wrong.")
+    end
   end
 
   def save_notify(conn, changeset) do

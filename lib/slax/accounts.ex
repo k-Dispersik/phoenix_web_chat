@@ -394,8 +394,7 @@ defmodule Slax.Accounts do
     Phoenix.PubSub.subscribe(@pubsub, @user_avatar_topic)
   end
 
-  def update_subscrabtion_plan(user_id, subscription_id) do
-    user = Repo.get(User, user_id)
+  def update_subscription_plan(user, subscription_id) do
     subscription = Repo.get(Subscription, subscription_id)
 
     if subscription do
@@ -423,8 +422,7 @@ defmodule Slax.Accounts do
     current_expiry |> DateTime.add(duration * 86400)
   end
 
-  def reset_subscription_plan(user_id) do
-    user = Repo.get(User, user_id)
+  def reset_subscription_plan(user) do
 
     if user do
       changeset = User.subscription_changeset(user, %{
@@ -438,6 +436,14 @@ defmodule Slax.Accounts do
       end
     else
       {:error, "User not found"}
+    end
+  end
+
+  def subscription_active?(user) do
+    case user.subscription_expires_at do
+      nil -> false
+      expiration_date ->
+        DateTime.compare(expiration_date, DateTime.utc_now()) != :lt
     end
   end
 end
