@@ -1,0 +1,42 @@
+    <div class="fixed inset-0 flex items-center justify-center p-4 w-full h-full">
+        <!-- Modal content -->
+        <div class="relative p-4 text-center bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+            <%= if @response_from_acoin["status"] == "complete" do %>
+            <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 p-2 flex items-center justify-center mx-auto mb-3.5">
+                <.icon name="hero-check" class="h-8 w-8" />
+            </div>
+            <p class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Subscription renewed successfully.</p>
+            <% else %>
+            <div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900 p-2 flex items-center justify-center mx-auto mb-3.5">
+                <.icon name="hero-x-mark" class="h-8 w-8" />
+            </div>
+            <p class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Payment cancelled.</p>
+            <% end %>
+            <ul class="text-left text-green-700">
+                <li>
+                  <span class="text-blue-500">Amount:</span> 
+                  <span><%= 
+                    @response_from_acoin["amount"]
+                    |> Decimal.new()
+                    |> Decimal.div(100)
+                    |> Decimal.round(2)
+                  %></span>
+                </li>
+                <li>
+                  <span class="text-blue-500">Currency:</span> 
+                  <span><%= @response_from_acoin["currency"] %></span>
+                </li>
+                <li>
+                  <span class="text-blue-500">Transaction ID:</span> 
+                  <span><%= @response_from_acoin["transaction_id"] %></span>
+                </li>
+              </ul>
+            <button type="button" class="bg-indigo-700 py-2 px-3 text-sm font-medium text-center text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:focus:ring-primary-900">
+                <.link
+                    patch={~p"/rooms"}
+                >
+                Go to chat
+            </.link>
+            </button>
+        </div>
+    </div>

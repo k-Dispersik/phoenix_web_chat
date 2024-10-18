@@ -12,17 +12,19 @@
         <div class="mt-12 sm:mt-16 lg:mt-0 lg:ml-8 lg:flex-shrink-0">
           <div class="flex rounded-full shadow-sm">
             <button
-        type="button"
-        phx-click="toggle-plans"
-        class="relative inline-flex items-center rounded-l-full border border-transparent bg-gradient-to-r from-violet-500 to-indigo-600 px-6 py-3 text-sm font-medium text-white hover:from-violet-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
-      >
-        Monthly
-      </button>
+              type="button"
+              phx-click="toggle-plans"
+              phx-value-plan="monthly"
+              class="relative inline-flex items-center rounded-l-full border border-transparent bg-gradient-to-r from-violet-500 to-indigo-600 px-6 py-3 text-sm font-medium text-white hover:from-violet-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+            >
+              Monthly
+            </button>
             <button
-        type="button"
-        phx-click="toggle-plans"
-        class="relative inline-flex items-center rounded-r-full border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
-      >
+              type="button"
+              phx-click="toggle-plans"
+              phx-value-plan="yearly"
+              class="relative inline-flex items-center rounded-r-full border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+            >
         Yearly
       </button>
           </div>
@@ -36,13 +38,13 @@
               <div class="px-6 py-8 sm:p-10 sm:pb-6">
                 <div>
                   <span class="inline-flex rounded-full bg-violet-100 px-3 py-1 text-sm font-semibold text-black-600">
-                    Standard Plan
+                    Basic Plan
                   </span>
                 </div>
                 <div class="mt-4 flex items-baseline text-3xl font-extrabold">
-                    R<%= @price_list[@pricing_plans]["standard"] %>
+                    <%= @price_list[@billing_cycle]["basic"] %> ZAR
                     <span class="ml-1 text-2xl font-medium text-gray-500">
-                      /<%= @pricing_plans %>
+                      /<%= @billing_cycle %>
                     </span>
                   </div>
 
@@ -54,10 +56,10 @@
                   type="button"
                   phx-hook="SubHook"
                   phx-click="buy-click"
-                  value="standard"
+                  phx-value-sub_level="basic"
                   class="mt-8 block w-full rounded-md bg-gradient-to-r from-violet-600 to-indigo-600 py-3 px-5 font-medium text-white shadow hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 focus:ring-offset-violet-200"
                 >
-                  Buy Standard
+                  Buy Basic
                 </button>
               </div>
               <div class="flex flex-1 flex-col justify-between rounded-b-lg bg-gray-50 p-6 sm:p-10 sm:pb-6">
@@ -109,9 +111,9 @@
                   </span>
                 </div>
                 <div class="mt-4 flex items-baseline text-3xl font-extrabold">
-                    R<%= @price_list[@pricing_plans]["advanced"] %>
+                    <%= @price_list[@billing_cycle]["advanced"] %> ZAR
                   <span class="ml-1 text-2xl font-medium text-gray-500">
-                    /<%= @pricing_plans %>
+                    /<%= @billing_cycle %>
                   </span>
                 </div>
                 <p class="mt-5 text-lg text-gray-500">
@@ -122,7 +124,7 @@
                         type="button"
                         phx-click="buy-click"
                         phx-hook="SubHook"
-                        value="advanced"
+                        phx-value-sub_level="advanced"
                         class="mt-8 block w-full rounded-md bg-gradient-to-r from-violet-600 to-indigo-600 py-3 px-5 font-medium text-white shadow hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 focus:ring-offset-violet-200"
                         >
                     Buy Advanced
@@ -172,9 +174,8 @@
           </div>
             <.redemption_form
             form={@form}
-            pricing_plans={@pricing_plans}
+            billing_cycle={@billing_cycle}
             price_list={@price_list}
-            selected_price={@selected_price}
             >
             </.redemption_form>
         </div>

@@ -64,6 +64,38 @@ defmodule SlaxWeb.ChatRoomLive.ProfileComponent do
         <h2 class="text-xl font-bold text-gray-800">
           <%= @user.username %>
         </h2>
+        <hr class="border-t border-gray-300 my-4">
+        <%= if @user.subscription_expires_at do %>
+          <h2 class="text-lg text-indigo-800">
+            <span class="text-gray-800"> Subscription valid until:: </span> <%= @user.subscription_expires_at |> Timex.format!("{0D}.{0M}.{YYYY}")  %>
+          </h2>
+        <% end %>
+          <br>
+          <h2 class="text-lg text-green-800">
+            <span class="text-gray-800"> Subscription type: </span> <%= @user.subscription_type %>
+          </h2>
+          <br>
+          <.link patch={~p"/transactions/create"}
+          class="flex items-center font-bold text-green-700 border border-green-600 py-2 px-4 gap-2 rounded inline-flex items-center">
+          <span>
+              Update subscription
+          </span>
+          <svg class="w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              viewBox="0 0 24 24" class="w-2 h-2 ml-2">
+              <path d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+          </svg>
+        </.link>
+        <br>
+        <.link patch={~p"/transactions/list"}
+          class="flex items-center text-blue-700 border border-blue-600 py-2 px-4 gap-2 rounded inline-flex items-center">
+          <span>
+              Payments History
+          </span>
+          <svg class="w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              viewBox="0 0 24 24" class="w-2 h-2 ml-2">
+              <path d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+          </svg>
+        </.link>
       </div>
     </div>
     """

@@ -7,6 +7,7 @@ defmodule Slax.Accounts do
   alias Slax.Repo
 
   alias Slax.Accounts.{User, UserToken, UserNotifier}
+  alias Slax.Subscription
 
   ## Database getters
 
@@ -391,5 +392,52 @@ defmodule Slax.Accounts do
 
   def subscribe_to_user_avatars do
     Phoenix.PubSub.subscribe(@pubsub, @user_avatar_topic)
+  end
+
+  def update_subscrabtion_plan(user_id, subscription_id) do
+    user = Repo.get(User, user_id)
+    subscription = Repo.get(Subscription, subscription_id)
+
+    if subscription do
+      new_expiry_date = calculate_new_expiry_date(user.subscription_expires_at, subscription.duration)
+
+      changeset = User.subscription_changeset(user, %{
+        subscription_type: subscription.name,
+        subscription_expires_at: new_expiry_date
+      })
+
+      case Repo.update(changeset) do
+        {:ok, updated_user} -> {:ok, updated_user}
+        {:error, changeset} -> {:error, changeset}
+      end
+    else
+      {:error, "Subscription not found for the given name and level"}
+    end
+  end
+
+  defp calculate_new_expiry_date(nil, duration) do
+    DateTime.utc_now() |> DateTime.add(duration * 86400)
+  end
+
+  defp calculate_new_expiry_date(current_expiry, duration) do
+    current_expiry |> DateTime.add(duration * 86400)
+  end
+
+  def reset_subscription_plan(user_id) do
+    user = Repo.get(User, user_id)
+
+    if user do
+      changeset = User.subscription_changeset(user, %{
+        subscription_type: "free",
+        subscription_expires_at: nil
+      })
+
+      case Repo.update(changeset) do
+        {:ok, updated_user} -> {:ok, updated_user}
+        {:error, changeset} -> {:error, changeset}
+      end
+    else
+      {:error, "User not found"}
+    end
   end
 end

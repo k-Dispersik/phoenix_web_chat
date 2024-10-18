@@ -90,10 +90,8 @@ defmodule SlaxWeb.Router do
         live "/users/confirm", UserConfirmationInstructionsLive, :new
         # phone redemption
         live "/transactions/create", PhoneRedemptionLive
-        live "/transactions/notify", PhoneRedemptionLive, :notify
-        live "/transactions/cancel", PhoneRedemptionLive, :cancel
-        live "/transactions/error", PhoneRedemptionLive, :error
-        live "/transactions/success", PhoneRedemptionLive, :success
+        live "/transactions/list", TransactionsListLive
+        live "/transactions/status", TransactionsStatusLive
     end
   end
 end

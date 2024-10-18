@@ -14,6 +14,7 @@ defmodule Slax.Accounts.User do
     field :confirmed_at, :utc_datetime
     field :avatar_path, :string
     field :subscription_type, :string, default: "free"
+    field :subscription_expires_at, :utc_datetime
 
     has_many :payment_histories, PaymentHistories
     has_many :reactions, Reaction
@@ -193,5 +194,11 @@ defmodule Slax.Accounts.User do
   def avatar_changeset(user, attrs \\ %{}) do
     user
     |> cast(attrs, [:avatar_path])
+  end
+
+  def subscription_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:subscription_type, :subscription_expires_at])
+    |> validate_required([:subscription_type])
   end
 end

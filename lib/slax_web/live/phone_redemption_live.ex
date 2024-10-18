@@ -1,9 +1,11 @@
 defmodule SlaxWeb.PhoneRedemptionLive do
   use SlaxWeb, :live_view
 
+  alias Slax.Repo
   alias Slax.Transactions
   alias Slax.Accounts.PaymentHistories
   alias Ecto.Changeset
+  alias Slax.Subscription
 
   def redemption_form(assigns) do
     ~H"""
@@ -17,10 +19,6 @@ defmodule SlaxWeb.PhoneRedemptionLive do
         >
           <h2 class="text-center">Payment for subscription</h2>
           <.input field={@form[:phone_number]} type="text" label="Phone number" />
-          <div
-          class="mt-8 w-full text-center text-2xl rounded-md py-3 px-5 font-lg text-green-700 shadow">
-            R<%= @selected_price %>
-          </div>
           <:actions>
             <.button class="w-full text-4xl">Pay</.button>
           </:actions>
@@ -39,8 +37,8 @@ defmodule SlaxWeb.PhoneRedemptionLive do
     socket
     |> assign_form(changeset)
     |> assign(:price_list, price_list())
-    |> assign(:pricing_plans, "monthly")
-    |> assign(:show_modal, false)
+    |> assign(:sub_level, "basic")
+    |> assign(:billing_cycle, "monthly")
     |> assign(:selected_price, nil)}
 
   end
@@ -60,14 +58,10 @@ defmodule SlaxWeb.PhoneRedemptionLive do
     noreply(socket)
   end
 
-  def handle_event("toggle-plans", _params, socket) do
-    cond do
-      socket.assigns.pricing_plans == "monthly" ->
-        {:noreply, assign(socket, pricing_plans: "yearly")}
-
-      socket.assigns.pricing_plans == "yearly" ->
-          {:noreply, assign(socket, pricing_plans: "monthly")}
-    end
+  def handle_event("toggle-plans", %{"plan" => plan}, socket) do
+    socket
+      |> assign(:billing_cycle, plan)
+      |> noreply()
   end
 
   def handle_event("validate-redemption-phone", %{"phone_form" => %{"phone_number" => phone_number}}, socket) do
@@ -79,9 +73,21 @@ defmodule SlaxWeb.PhoneRedemptionLive do
   end
 
   def handle_event("submit-redemption", %{"phone_form" => %{"phone_number" => phone_number}}, socket) do
-    amount = socket.assigns.selected_price
+    sub_level = socket.assigns.sub_level
+    billing_cycle = socket.assigns.billing_cycle
 
-    case Transactions.create(phone_number, amount, socket.assings.current_user.username) do
+    selected_price = socket.assigns.price_list[billing_cycle][sub_level]
+    IO.inspect(sub_level, label: "sub_level")
+    IO.inspect(billing_cycle, label: "billing_cycle")
+    IO.inspect(selected_price, label: "selected_price")
+    amount = Decimal.to_integer(selected_price) * 100
+
+    sub =
+      Repo.get_by(Subscription, name: sub_level, billing_cycle: billing_cycle)
+
+    merchant_reference = "#{socket.assigns.current_user.username}|#{sub.id}"
+
+    case Transactions.create(phone_number, amount, merchant_reference) do
       {:ok, %{"redirect_url" => redirect_url}} ->
         socket
         |> put_flash(:info, "Redirecting...")
@@ -97,32 +103,24 @@ defmodule SlaxWeb.PhoneRedemptionLive do
     end
   end
 
-  def handle_event("buy-click", %{"value" => value}, socket) do
-    selected_price = get_selected_price(socket.assigns.pricing_plans, value)
-
+  def handle_event("buy-click", %{"sub_level" => sub_level}, socket) do
     socket
-      |> assign(:show_modal, true)
-      |> assign(:selected_price, selected_price)
+      |> assign(:sub_level, sub_level)
       |> noreply()
   end
 
-  defp get_selected_price(plans, level) do
-    price_list()[plans][level]
-  end
+  def price_list() do
+    subscriptions = Repo.all(Subscription)
 
-  # Temporary function for subscription price list.
-  # This function will likely be replaced by a database-driven solution in the future.
-  defp price_list() do
-    %{
-      "monthly" => %{
-        "standard" => 5,
-        "advanced" => 9
-      },
-      "yearly" => %{
-        "standard" => 60,
-        "advanced" => 100
-      }
-    }
+    Enum.reduce(subscriptions, %{}, fn subscription, acc ->
+      cycle = subscription.billing_cycle
+      name = subscription.name
+      price = subscription.price
+
+      Map.update(acc, cycle, %{name => price}, fn current ->
+        Map.put(current, name, price)
+      end)
+    end)
   end
 
 end
