@@ -1,6 +1,14 @@
     <div class="fixed inset-0 flex items-center justify-center p-4 w-full h-full">
         <!-- Modal content -->
         <div class="relative p-4 text-center bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+          <%= if @response_from_acoin["error_code"] do %>
+          <div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900 p-2 flex items-center justify-center mx-auto mb-3.5">
+              <.icon name="hero-x-mark" class="h-8 w-8" />
+          </div>
+          <p class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+              <%= @response_from_acoin["message"] %>
+          </p>
+          <% else %>
             <%= if @response_from_acoin["status"] == "complete" do %>
             <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 p-2 flex items-center justify-center mx-auto mb-3.5">
                 <.icon name="hero-check" class="h-8 w-8" />
@@ -31,6 +39,7 @@
                   <span><%= @response_from_acoin["transaction_id"] %></span>
                 </li>
               </ul>
+            <% end %>
             <button type="button" class="bg-indigo-700 py-2 px-3 text-sm font-medium text-center text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:focus:ring-primary-900">
                 <.link
                     patch={~p"/rooms"}

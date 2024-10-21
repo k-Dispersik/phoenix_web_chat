@@ -1,10 +1,10 @@
 defmodule Slax.Transactions do
 
-  alias Slax.Accounts.User
+  alias Slax.Accounts.{User, PaymentHistories}
   alias Slax.Repo
 
   @api_token Application.compile_env(:slax, :api_keys)[:acoin]
-  @url_prefix "https://82cf-212-92-239-219.ngrok-free.app"
+  @url_prefix "https://f547-212-92-239-219.ngrok-free.app"
 
   def create(phone_number, amount, merchant_reference) do
     headers = [
@@ -26,8 +26,8 @@ defmodule Slax.Transactions do
 
     case Jason.encode(body) do
       {:ok, json_body} ->
-        request = Finch.build(:post, endpoint_url, headers, json_body)
 
+        request = Finch.build(:post, endpoint_url, headers, json_body)
         send_request(request)
 
       {:error, _reason} ->
@@ -56,4 +56,7 @@ defmodule Slax.Transactions do
     Repo.insert(changeset)
   end
 
+  def get_transactions_by_transaction_id(transaction_id) do
+    Repo.get_by(PaymentHistories, transaction_id: transaction_id)
+  end
 end

@@ -91,18 +91,29 @@ defmodule SlaxWeb.PhoneRedemptionLive do
         |> redirect(external: redirect_url)
         |> noreply()
 
-      {:error, status_code, body} ->
-        IO.inspect(body, label: "Body")
 
-         socket
-         |> put_flash(:error, "Payment failed: #{status_code}")
-         |> noreply()
+      {:error, 200,
+      %{"error_code" => error_code,
+      "message" => message,
+      "success" => success}} ->
+
+        redirect_url = "/transactions/status?error_code=#{error_code}&message=#{message}&success=#{success}"
+        socket
+        |> redirect(to: redirect_url)
+        |> noreply()
+
+      {:error, status_code, body} ->
+          IO.inspect(body, label: "Body")
+
+          socket
+          |> put_flash(:error, "Payment failed: #{status_code}")
+          |> noreply()
     end
   end
 
   def handle_event("buy-click", %{"sub_level" => sub_level}, socket) do
     billing_cycle = socket.assigns.billing_cycle
-    IO.inspect(socket.assigns.billing_cycle)
+
     socket
       |> assign(:selected_price, socket.assigns.price_list[billing_cycle][sub_level])
       |> assign(:sub_level, sub_level)
